@@ -1,121 +1,32 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MiniTrade Demo</title>
-  <style>
-    body{font-family:system-ui,Arial;background:#f3f4f6;padding:20px}
-    .card{background:#fff;padding:16px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.08);max-width:700px;margin:12px auto}
-    input,button{padding:8px;margin:6px 0}
-    .row{display:flex;gap:8px;align-items:center}
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trading Ảo</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="card">
-    <h2>MiniTrade (Demo) — GitHub Pages + Google Sheets</h2>
-    <div>
-      <strong>API:</strong> <span id="apiUrl"></span>
-    </div>
-    <hr>
-    <div>
-      <h3>Register</h3>
-      <input id="regUser" placeholder="username" />
-      <input id="regPass" placeholder="password" type="password" />
-      <button onclick="register()">Register</button>
+  <div class="container">
+    <h1>🔥 Web Trading Ảo</h1>
+
+    <div id="auth-section">
+      <input type="email" id="email" placeholder="Email">
+      <input type="password" id="password" placeholder="Mật khẩu">
+      <button id="registerBtn">Đăng ký</button>
+      <button id="loginBtn">Đăng nhập</button>
     </div>
 
-    <div>
-      <h3>Login</h3>
-      <input id="loginUser" placeholder="username" />
-      <input id="loginPass" placeholder="password" type="password" />
-      <button onclick="login()">Login</button>
-    </div>
-
-    <div id="walletArea" style="display:none">
-      <h3>Wallet — <span id="who"></span></h3>
-      <div>USD: <span id="usd">0</span></div>
-      <div>MYC: <span id="myc">0</span></div>
-
-      <div style="margin-top:10px">
-        <input id="amt" placeholder="amount (MYC)" type="number" step="0.000001" />
-        <select id="side"><option value="buy">Buy</option><option value="sell">Sell</option></select>
-        <button onclick="trade()">Submit</button>
-      </div>
-    </div>
-
-    <div style="margin-top:12px">
-      <button onclick="logout()">Logout</button>
-    </div>
-
-    <hr>
-    <div>
-      <small>Note: replace <code>API_URL</code> bên dưới bằng URL Apps Script đã deploy.</small>
+    <div id="trade-section" style="display:none;">
+      <p>Xin chào, <span id="userEmail"></span></p>
+      <p>Số dư: <span id="balance">0</span> 💰</p>
+      <button id="depositBtn">Nạp +100</button>
+      <button id="withdrawBtn">Rút -50</button>
+      <button id="logoutBtn">Đăng xuất</button>
     </div>
   </div>
 
-<script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzrBFdN6xl2svXH1lo2jEz8R6R_XHKVbJoJ9_uT0ZDQbKxYMGlH0dK83L8oyAO2fZlLTQ/exec"; // <-- THAY CHỖ NÀY
-document.getElementById('apiUrl').innerText = API_URL || 'CHƯA ĐƯA API_URL';
-
-async function apiPost(payload){
-  try{
-    const r = await fetch(API_URL, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    });
-    return await r.json();
-  } catch(e){
-    alert('API error: '+e.message);
-    console.error(e);
-  }
-}
-
-async function register(){
-  const username = document.getElementById('regUser').value.trim();
-  const password = document.getElementById('regPass').value.trim();
-  if(!username || !password) return alert('Nhập user+pass');
-  const res = await apiPost({ action: 'register', username, password });
-  if(res && res.status === 'success'){ alert('Đăng ký OK, đăng nhập thôi'); }
-  else alert('Err: '+(res.message||JSON.stringify(res)));
-}
-
-async function login(){
-  const username = document.getElementById('loginUser').value.trim();
-  const password = document.getElementById('loginPass').value.trim();
-  if(!username||!password) return alert('Nhập user+pass');
-  const res = await apiPost({ action: 'login', username, password });
-  if(res && res.status === 'success'){
-    localStorage.setItem('mt_user', username);
-    renderWallet(res.usd, res.mycoin, username);
-  } else alert('Login fail: '+(res.message||JSON.stringify(res)));
-}
-
-function renderWallet(usd,myc,username){
-  document.getElementById('walletArea').style.display='block';
-  document.getElementById('who').innerText = username;
-  document.getElementById('usd').innerText = usd;
-  document.getElementById('myc').innerText = myc;
-}
-
-function logout(){
-  localStorage.removeItem('mt_user');
-  document.getElementById('walletArea').style.display='none';
-}
-
-async function trade(){
-  const username = localStorage.getItem('mt_user');
-  if(!username) return alert('Login đã bro');
-  const amount = Number(document.getElementById('amt').value);
-  const side = document.getElementById('side').value;
-  if(!amount || amount <= 0) return alert('Nhập amount > 0');
-  const res = await apiPost({ action: 'trade', username, side, amount });
-  if(res && res.status === 'success'){
-    renderWallet(res.usd, res.mycoin, username);
-    alert('Trade OK @ price ' + res.price);
-  } else alert('Trade fail: '+(res.message||JSON.stringify(res)));
-}
-</script>
+  <!-- Firebase SDK -->
+  <script type="module" src="script.js"></script>
 </body>
 </html>
