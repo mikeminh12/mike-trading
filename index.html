@@ -1,32 +1,32 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mike Trading</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trading Account</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
+<h1>Trading System</h1>
 
-    <h1>💹 Mike Trading</h1>
+<div id="auth">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="register()">Register</button>
+    <button onclick="login()">Login</button>
+</div>
 
-    <!-- Đăng ký & Đăng nhập -->
-    <div id="auth-section">
-      <input type="email" id="email" placeholder="Email">
-      <input type="password" id="password" placeholder="Mật khẩu">
-      <button id="registerBtn">Đăng ký</button>
-      <button id="loginBtn">Đăng nhập</button>
-    </div>
+<div id="dashboard" style="display:none;">
+    <h2>Xin chào, <span id="username"></span></h2>
+    <p>Số dư: $<span id="balance"></span></p>
+    <input type="number" id="amount" placeholder="Trade amount">
+    <button onclick="updateBalance()">Trade</button>
+    <button onclick="logout()">Logout</button>
+</div>
 
-    <!-- Khu vực sau khi đăng nhập -->
-    <div id="user-section" class="hidden">
-      <h2>Xin chào, <span id="userEmail"></span></h2>
-      <p>Số dư hiện tại: <span id="balance">0</span> 💰</p>
-      <button id="logoutBtn">Đăng xuất</button>
-    </div>
-  </div>
-
-  <script type="module" src="script.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
