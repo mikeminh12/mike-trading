@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trading Ảo</title>
+  <title>Mike Trading</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <h1>🔥 Web Trading Ảo</h1>
 
+    <h1>💹 Mike Trading</h1>
+
+    <!-- Đăng ký & Đăng nhập -->
     <div id="auth-section">
       <input type="email" id="email" placeholder="Email">
       <input type="password" id="password" placeholder="Mật khẩu">
@@ -17,16 +19,14 @@
       <button id="loginBtn">Đăng nhập</button>
     </div>
 
-    <div id="trade-section" style="display:none;">
-      <p>Xin chào, <span id="userEmail"></span></p>
-      <p>Số dư: <span id="balance">0</span> 💰</p>
-      <button id="depositBtn">Nạp +100</button>
-      <button id="withdrawBtn">Rút -50</button>
+    <!-- Khu vực sau khi đăng nhập -->
+    <div id="user-section" class="hidden">
+      <h2>Xin chào, <span id="userEmail"></span></h2>
+      <p>Số dư hiện tại: <span id="balance">0</span> 💰</p>
       <button id="logoutBtn">Đăng xuất</button>
     </div>
   </div>
 
-  <!-- Firebase SDK -->
   <script type="module" src="script.js"></script>
 </body>
 </html>
