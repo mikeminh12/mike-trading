@@ -1,13 +1,13 @@
-// Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyANI-NhTbl8R20twhekpnXtzZvmkOLqP24",
-    authDomain: "miketrading-3b86a.firebaseapp.com",
-    projectId: "miketrading-3b86a",
-    storageBucket: "miketrading-3b86a.appspot.com",
-    messagingSenderId: "692740435477",
-    appId: "1:692740435477:web:e9b9a3696b87eef187e81c",
-    measurementId: "G-3NX2TKD3NK"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyANI-NhTbl8R20twhekpnXtzZvmkOLqP24",
+  authDomain: "miketrading-3b86a.firebaseapp.com",
+  databaseURL: "https://miketrading-3b86a-default-rtdb.firebaseio.com",
+  projectId: "miketrading-3b86a",
+  storageBucket: "miketrading-3b86a.appspot.com",
+  messagingSenderId: "692740435477",
+  appId: "1:692740435477:web:e9b9a3696b87eef187e81c",
+  measurementId: "G-3NX2TKD3NK"
+};
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -46,7 +46,6 @@ function showDashboard(uid) {
     document.getElementById('auth').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
 
-    // Load user info
     db.ref('users/' + uid).on('value', snap => {
         const data = snap.val();
         document.getElementById('username').innerText = data.username;
@@ -54,7 +53,6 @@ function showDashboard(uid) {
         document.getElementById('mCoinAmount').innerText = data.mCoinAmount.toFixed(2);
     });
 
-    // Load mCoin price
     db.ref('market/mCoin/price').on('value', snap => {
         document.getElementById('mCoinPrice').innerText = snap.val().toFixed(2);
     });
@@ -108,32 +106,30 @@ function logout() {
     });
 }
 
-// mCoin price simulator
+// Price simulator
 function startPriceSimulator() {
     db.ref('market/mCoin').once('value').then(snap => {
-        if(!snap.exists()) {
-            db.ref('market/mCoin').set({ price: 50, history: [50] });
-        }
+        if(!snap.exists()) db.ref('market/mCoin').set({ price: 50, history: [50] });
     });
 
     setInterval(() => {
-        const fluctuation = (Math.random() - 0.5) * 2; // ±1 USD
+        const fluctuation = (Math.random() - 0.5) * 2;
         const marketRef = db.ref('market/mCoin');
 
         marketRef.once('value').then(snap => {
             let price = snap.val().price;
             let history = snap.val().history || [];
 
-            price = Math.max(1, price + fluctuation); // giá không âm
+            price = Math.max(1, price + fluctuation);
             history.push(price);
-            if(history.length > 50) history.shift(); // giữ 50 điểm gần nhất
+            if(history.length > 50) history.shift();
 
             marketRef.update({ price, history });
         });
     }, 5000);
 }
 
-// Chart.js setup
+// Chart.js
 const ctx = document.getElementById('priceChart').getContext('2d');
 const priceChart = new Chart(ctx, {
     type: 'line',
@@ -141,7 +137,6 @@ const priceChart = new Chart(ctx, {
     options: { responsive: true }
 });
 
-// Update chart realtime
 db.ref('market/mCoin/history').on('value', snap => {
     const history = snap.val() || [];
     priceChart.data.labels = history.map((_, i) => i+1);
@@ -149,5 +144,4 @@ db.ref('market/mCoin/history').on('value', snap => {
     priceChart.update();
 });
 
-// Start simulator
 startPriceSimulator();
