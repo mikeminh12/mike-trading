@@ -8,11 +8,12 @@ const firebaseConfig = {
   apiKey: "AIzaSyANI-NhTbl8R20twhekpnXtzZvmkOLqP24",
   authDomain: "miketrading-3b86a.firebaseapp.com",
   projectId: "miketrading-3b86a",
-  storageBucket: "miketrading-3b86a.firebasestorage.app",
+  storageBucket: "miketrading-3b86a.appspot.com",  // ✅ Sửa lại ở đây
   messagingSenderId: "692740435477",
   appId: "1:692740435477:web:e9b9a3696b87eef187e81c",
   measurementId: "G-3NX2TKD3NK"
 };
+
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
