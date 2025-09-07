@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trading Account</title>
+<title>mCoin Trading Simulator</title>
 <link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-<h1>Trading System</h1>
+<h1>mCoin Trading Simulator</h1>
 
 <div id="auth">
     <input type="email" id="email" placeholder="Email">
@@ -18,10 +19,16 @@
 
 <div id="dashboard" style="display:none;">
     <h2>Xin chào, <span id="username"></span></h2>
-    <p>Số dư: $<span id="balance"></span></p>
-    <input type="number" id="amount" placeholder="Trade amount">
-    <button onclick="updateBalance()">Trade</button>
+    <p>USD Balance: $<span id="balanceUSD"></span></p>
+    <p>mCoin Balance: <span id="mCoinAmount"></span> mCoin</p>
+    <p>Current mCoin Price: $<span id="mCoinPrice"></span></p>
+
+    <input type="number" id="tradeAmount" placeholder="Amount">
+    <button onclick="buyMCoin()">Buy mCoin</button>
+    <button onclick="sellMCoin()">Sell mCoin</button>
     <button onclick="logout()">Logout</button>
+
+    <canvas id="priceChart" width="400" height="200"></canvas>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
