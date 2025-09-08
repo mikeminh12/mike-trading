@@ -1,74 +1,59 @@
 body {
-  font-family: 'Segoe UI', sans-serif;
-  text-align: center;
-  background: linear-gradient(135deg, #74ebd5, #ACB6E5);
-  margin: 0;
-  padding: 20px;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+    background: #f0f2f5;
 }
 
-h1 {
-  color: white;
-  text-shadow: 0 0 10px rgba(0,0,0,0.3);
-}
-
-.glass {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-  padding: 20px;
-  margin: 20px auto;
-  border-radius: 16px;
-  width: 500px;
-  color: white;
-}
-
-input, button {
-  padding: 8px;
-  margin: 5px;
-  border-radius: 8px;
-  border: none;
+input {
+    padding: 5px;
+    margin: 5px;
 }
 
 button {
-  cursor: pointer;
-  background: #00c6ff;
-  color: white;
-  font-weight: bold;
-  transition: 0.2s;
+    padding: 5px 10px;
+    margin: 5px;
+    cursor: pointer;
 }
 
-button:hover {
-  background: #0072ff;
+canvas {
+    margin-top: 20px;
 }
 
 table {
-  width: 100%;
-  margin-top: 10px;
-  border-collapse: collapse;
+    width: 100%;
+    margin-top: 15px;
+    border-collapse: collapse;
 }
 
 th, td {
-  padding: 8px;
-  color: white;
+    padding: 8px;
+    border: 1px solid #ccc;
 }
 
-thead {
-  background-color: rgba(255, 255, 255, 0.2);
+/* Toast thông báo nổi */
+#toastContainer {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-tr:nth-child(even) {
-  background-color: rgba(255, 255, 255, 0.05);
+.toast {
+    background-color: #333;
+    color: #fff;
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.5s ease;
 }
 
-.notifications {
-  margin-top: 15px;
-  max-height: 120px;
-  overflow-y: auto;
-  text-align: left;
-}
-.notification {
-  background: rgba(255,255,255,0.2);
-  padding: 6px;
-  margin-bottom: 5px;
-  border-radius: 8px;
+.toast.show {
+    opacity: 1;
+    transform: translateX(0);
 }
