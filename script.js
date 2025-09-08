@@ -85,7 +85,7 @@ function showDashboard(uid) {
     document.getElementById("auth").style.display = "none";
     document.getElementById("dashboard").style.display = "block";
 
-    // Lắng nghe dữ liệu user realtime
+    // Dữ liệu user hiện tại
     db.ref("users/" + uid).on("value", snap => {
         const data = snap.val();
         if (data) {
@@ -95,7 +95,7 @@ function showDashboard(uid) {
         }
     });
 
-    // Lắng nghe giá mCoin realtime
+    // Giá mCoin realtime
     db.ref("market/mCoin").on("value", snap => {
         const data = snap.val();
         if (data) {
@@ -108,39 +108,20 @@ function showDashboard(uid) {
         }
     });
 
-    // Lắng nghe bảng xếp hạng realtime
+    // Danh sách tất cả user realtime
     db.ref("users").on("value", snapshot => {
-        updateLeaderboard(snapshot);
-    });
-}
-
-// === Cập nhật bảng xếp hạng ===
-function updateLeaderboard(snapshot) {
-    const tbody = document.querySelector("#leaderboard tbody");
-    tbody.innerHTML = "";
-
-    const users = [];
-    snapshot.forEach(child => {
-        const u = child.val();
-        users.push({
-            username: u.username,
-            balanceUSD: u.balanceUSD,
-            mCoinAmount: u.mCoinAmount
+        const tbody = document.querySelector("#usersTable tbody");
+        tbody.innerHTML = "";
+        snapshot.forEach(child => {
+            const u = child.val();
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${u.username}</td>
+                <td>$${u.balanceUSD.toFixed(2)}</td>
+                <td>${u.mCoinAmount.toFixed(2)} mCoin</td>
+            `;
+            tbody.appendChild(tr);
         });
-    });
-
-    // Sắp xếp theo tổng tài sản = balanceUSD + (mCoinAmount * giá hiện tại)
-    users.sort((a, b) => (b.balanceUSD + b.mCoinAmount * currentPrice) - (a.balanceUSD + a.mCoinAmount * currentPrice));
-
-    users.forEach((u, i) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-            <td>${i + 1}</td>
-            <td>${u.username}</td>
-            <td>$${u.balanceUSD.toFixed(2)}</td>
-            <td>${u.mCoinAmount.toFixed(2)} mCoin</td>
-        `;
-        tbody.appendChild(tr);
     });
 }
 
@@ -182,7 +163,7 @@ function sellMCoin() {
     });
 }
 
-// === Tự tạo market nếu chưa có ===
+// === Mô phỏng giá ===
 function startPriceSimulator() {
     const marketRef = db.ref("market/mCoin");
     marketRef.once("value").then(snap => {
