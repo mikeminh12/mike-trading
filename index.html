@@ -1,68 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mCoin Trading Simulator</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mCoin Trading Simulator</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <div class="glass-container">
-    <h1>mCoin Trading</h1>
+<h1>mCoin Trading</h1>
 
-    <!-- Form đăng nhập / đăng ký -->
-    <div id="auth">
-      <input type="email" id="email" placeholder="Email" />
-      <input type="password" id="password" placeholder="Password" />
-      <div class="btn-group">
-        <button onclick="register()">Register</button>
-        <button onclick="login()">Login</button>
-      </div>
-    </div>
+<div id="auth" class="glass">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="register()">Register</button>
+    <button onclick="login()">Login</button>
+</div>
 
-    <!-- Dashboard -->
-    <div id="dashboard" style="display:none;">
-      <h2>Xin chào, <span id="username"></span> 👋</h2>
-      <p>💵 VND: <span id="balanceUSD"></span> USD</p>
-      <p>🪙 mCoin: <span id="mCoinAmount"></span> mCoin</p>
-      <p>📈 Giá mCoin: $<span id="mCoinPrice"></span></p>
+<div id="dashboard" class="glass" style="display:none;">
+    <h2>Xin chào, <span id="username"></span></h2>
+    <p>USD: $<span id="balanceUSD"></span></p>
+    <p>mCoin: <span id="mCoinAmount"></span> mCoin</p>
+    <p>mCoin Price: $<span id="mCoinPrice"></span></p>
 
-      <div class="trade-box">
-        <input type="number" id="tradeAmount" placeholder="Nhập số lượng" />
-        <button onclick="buyMCoin()">Mua mCoin</button>
-        <button onclick="sellMCoin()">Bán mCoin</button>
-        <button onclick="logout()">Đăng xuất</button>
-      </div>
+    <input type="number" id="tradeAmount" placeholder="Amount">
+    <button onclick="buyMCoin()">Buy mCoin</button>
+    <button onclick="sellMCoin()">Sell mCoin</button>
+    <button onclick="logout()">Logout</button>
 
-      <canvas id="priceChart" width="400" height="200"></canvas>
-
-      <h2>Bảng xếp hạng tài sản</h2>
-      <table>
+    <h3>Bảng xếp hạng tài sản 💰</h3>
+    <table id="leaderboard">
         <thead>
-          <tr>
-            <th>Top</th>
-            <th>Username</th>
-            <th>USD</th>
-            <th>mCoin</th>
-          </tr>
+            <tr>
+                <th>Rank</th>
+                <th>User</th>
+                <th>Total Asset ($)</th>
+            </tr>
         </thead>
-        <tbody id="leaderboard"></tbody>
-      </table>
-    </div>
-  </div>
+        <tbody id="leaderboardBody"></tbody>
+    </table>
 
-  <!-- Khung thông báo -->
-  <div id="notifications" class="glass-notify">
-    <h3>Thông báo</h3>
-    <ul id="notificationList"></ul>
-  </div>
+    <h3>Biểu đồ giá mCoin 📈</h3>
+    <canvas id="priceChart" width="400" height="200"></canvas>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <div id="notifications" class="notifications"></div>
+</div>
 
-  <script src="script.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
