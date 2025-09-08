@@ -1,6 +1,4 @@
-// script.js (REPLACE your old file with this)
-
-// Firebase config (giữ nguyên của bạn)
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyANI-NhTbl8R20twhekpnXtzZvmkOLqP24",
   authDomain: "miketrading-3b86a.firebaseapp.com",
@@ -13,16 +11,14 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
 const db = firebase.database();
 
-// GLOBALS
 let currentUID = null;
-let currentPrice = 50;         // updated from DB
-const usersMap = {};          // { uid: {username, balanceUSD, mCoinAmount} }
+let currentPrice = 50;
+const usersMap = {};
 let listenersInitialized = false;
 
-// --- Chart.js setup (keep as before) ---
+// Chart setup
 const ctx = document.getElementById('priceChart').getContext('2d');
 const priceChart = new Chart(ctx, {
     type: 'line',
@@ -30,220 +26,167 @@ const priceChart = new Chart(ctx, {
     options: { responsive: true }
 });
 
-// --- AUTH functions ---
+// Đăng ký user mới
 function register() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    if(!email || !password) return alert("Nhập email và password!");
+    const username = document.getElementById('usernameInput').value.trim();
+    if(!username) return alert("Nhập username!");
 
-    auth.createUserWithEmailAndPassword(email, password)
-    .then(userCredential => {
-        const uid = userCredential.user.uid;
-        db.ref('users/' + uid).set({
-            username: email.split('@')[0],
-            balanceUSD: 1000,
-            mCoinAmount: 0
-        }).then(() => {
-            alert('Đăng ký thành công!');
-            showDashboard(uid);
-        });
-    })
-    .catch(error => alert(error.message));
-}
-
-function login() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    if(!email || !password) return alert("Nhập email và password!");
-
-    auth.signInWithEmailAndPassword(email, password)
-    .then(userCredential => {
-        showDashboard(userCredential.user.uid);
-    })
-    .catch(error => alert(error.message));
-}
-
-function logout() {
-    // detach per-user listener
-    if (currentUID) db.ref('users/' + currentUID).off('value');
-    currentUID = null;
-    auth.signOut().then(() => {
-        document.getElementById('auth').style.display = 'block';
-        document.getElementById('dashboard').style.display = 'none';
+    const uid = db.ref('users').push().key;
+    db.ref('users/' + uid).set({
+        username,
+        balanceUSD: 1000,
+        mCoinAmount: 0
+    }).then(() => {
+        alert("Đăng ký thành công!");
+        showDashboard(uid);
     });
 }
 
-// --- RENDER leaderboard ---
+// Đăng nhập (tìm user theo username)
+function login() {
+    const username = document.getElementById('usernameInput').value.trim();
+    if(!username) return alert("Nhập username!");
+
+    db.ref('users').orderByChild('username').equalTo(username).once('value').then(snap => {
+        if(snap.exists()){
+            const uid = Object.keys(snap.val())[0];
+            showDashboard(uid);
+        } else {
+            alert("Username không tồn tại!");
+        }
+    });
+}
+
+function logout() {
+    currentUID = null;
+    document.getElementById('auth').style.display = 'block';
+    document.getElementById('dashboard').style.display = 'none';
+}
+
+// Render bảng xếp hạng
 function renderLeaderboard() {
-    // build array from usersMap
     const arr = Object.keys(usersMap).map(uid => {
         const u = usersMap[uid];
         const usd = Number(u.balanceUSD) || 0;
         const m = Number(u.mCoinAmount) || 0;
-        const asset = usd + m * (Number(currentPrice) || 50);
-        return { username: u.username || uid, asset };
+        const asset = usd + m * currentPrice;
+        return { username: u.username, asset };
     });
-
     arr.sort((a,b) => b.asset - a.asset);
     const body = document.getElementById('leaderboardBody');
-    if(!body) return;
     let html = '';
     arr.forEach((u, i) => {
         html += `<tr>
             <td>${i+1}</td>
-            <td>${escapeHtml(u.username)}</td>
-            <td>$${Number(u.asset).toFixed(2)}</td>
+            <td>${u.username}</td>
+            <td>$${u.asset.toFixed(2)}</td>
         </tr>`;
     });
     body.innerHTML = html;
 }
 
-// small helper to avoid XSS (in case)
-function escapeHtml(text) {
-  if (!text && text !== 0) return '';
-  return String(text).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; });
-}
-
-// --- Toast ---
+// Toast thông báo
 function showToast(msg) {
     const container = document.getElementById('toastContainer');
-    if(!container) return;
     const toast = document.createElement('div');
     toast.className = 'toast';
     toast.innerText = msg;
     container.appendChild(toast);
-
-    // animate in
     setTimeout(() => toast.classList.add('show'), 50);
-    // auto hide after 5s
     setTimeout(() => {
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 400);
     }, 5000);
 }
 
-// push notification both to DB and immediate toast
 function pushNotification(msg) {
-    // push to DB for other clients
     db.ref('notifications').push().set(msg);
-    // local immediate toast
     showToast(msg);
 }
-
-// listen notifications -> show toasts
 db.ref('notifications').on('child_added', snap => {
-    const m = snap.val();
-    if(m) showToast(m);
+    const msg = snap.val();
+    if(msg) showToast(msg);
 });
 
-// --- Set up global listeners once ---
+// Khởi tạo listener
 function initGlobalListeners() {
     if (listenersInitialized) return;
     listenersInitialized = true;
 
-    // MARKET price listener
+    // Giá mCoin realtime
     db.ref('market/mCoin').on('value', snap => {
         const data = snap.val();
-        if(data && typeof data.price !== 'undefined') {
-            currentPrice = Number(data.price) || currentPrice;
-            // update chart + DOM
-            document.getElementById('mCoinPrice').innerText = Number(currentPrice).toFixed(2);
-            const history = data.history || [];
-            priceChart.data.labels = history.map((_, i) => i+1);
-            priceChart.data.datasets[0].data = history;
-            priceChart.update();
-            // price changed -> re-render leaderboard with new valuation
-            renderLeaderboard();
-        }
+        currentPrice = data.price;
+        document.getElementById('mCoinPrice').innerText = currentPrice.toFixed(2);
+        const history = data.history || [];
+        priceChart.data.labels = history.map((_, i) => i + 1);
+        priceChart.data.datasets[0].data = history;
+        priceChart.update();
+        renderLeaderboard();
     });
 
-    // USERS realtime by child events (fast + incremental)
+    // Users realtime
     const usersRef = db.ref('users');
-    usersRef.on('child_added', childSnap => {
-        usersMap[childSnap.key] = childSnap.val() || {};
-        renderLeaderboard();
-    });
-    usersRef.on('child_changed', childSnap => {
-        usersMap[childSnap.key] = childSnap.val() || {};
-        renderLeaderboard();
-    });
-    usersRef.on('child_removed', childSnap => {
-        delete usersMap[childSnap.key];
-        renderLeaderboard();
-    });
+    usersRef.on('child_added', s => { usersMap[s.key] = s.val(); renderLeaderboard(); });
+    usersRef.on('child_changed', s => { usersMap[s.key] = s.val(); renderLeaderboard(); });
+    usersRef.on('child_removed', s => { delete usersMap[s.key]; renderLeaderboard(); });
 }
 
-// --- Dashboard per-user ---
 function showDashboard(uid) {
     currentUID = uid;
     document.getElementById('auth').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
-
-    // init global listeners once
     initGlobalListeners();
-
-    // listen current user info realtime (for user-specific display)
     db.ref('users/' + uid).on('value', snap => {
-        const data = snap.val() || {};
-        document.getElementById('username').innerText = data.username || '';
-        document.getElementById('balanceUSD').innerText = (Number(data.balanceUSD)||0).toFixed(2);
-        document.getElementById('mCoinAmount').innerText = (Number(data.mCoinAmount)||0).toFixed(2);
+        const data = snap.val();
+        document.getElementById('username').innerText = data.username;
+        document.getElementById('balanceUSD').innerText = data.balanceUSD.toFixed(2);
+        document.getElementById('mCoinAmount').innerText = data.mCoinAmount.toFixed(2);
     });
 }
 
-// --- Trading actions ---
+// Mua mCoin — dùng transaction an toàn
 function buyMCoin() {
-    if(!auth.currentUser) return alert('Chưa đăng nhập!');
-    const uid = auth.currentUser.uid;
     const amount = parseFloat(document.getElementById('tradeAmount').value);
-    if(!amount || amount <= 0) return alert('Nhập số hợp lệ!');
+    if(!amount || amount <= 0) return alert("Nhập số hợp lệ!");
 
     db.ref('market/mCoin/price').once('value').then(snap => {
-        const price = Number(snap.val()) || currentPrice;
-        db.ref('users/' + uid).once('value').then(userSnap => {
-            const user = userSnap.val() || {};
-            const usd = Number(user.balanceUSD) || 0;
-            const m = Number(user.mCoinAmount) || 0;
-            const cost = amount * price;
-            if(usd >= cost) {
-                db.ref('users/' + uid).update({
-                    balanceUSD: usd - cost,
-                    mCoinAmount: m + amount
-                }).then(() => {
-                    const name = user.username || uid;
-                    pushNotification(`${name} vừa mua ${amount} mCoin 💸`);
-                });
-            } else alert('Không đủ USD!');
+        const price = snap.val();
+        db.ref('users/' + currentUID).transaction(user => {
+            if(user){
+                const cost = amount * price;
+                if(user.balanceUSD >= cost){
+                    user.balanceUSD -= cost;
+                    user.mCoinAmount += amount;
+                    pushNotification(`${user.username} vừa mua ${amount} mCoin 💸`);
+                }
+            }
+            return user;
         });
     });
 }
 
+// Bán mCoin — dùng transaction an toàn
 function sellMCoin() {
-    if(!auth.currentUser) return alert('Chưa đăng nhập!');
-    const uid = auth.currentUser.uid;
     const amount = parseFloat(document.getElementById('tradeAmount').value);
-    if(!amount || amount <= 0) return alert('Nhập số hợp lệ!');
+    if(!amount || amount <= 0) return alert("Nhập số hợp lệ!");
 
     db.ref('market/mCoin/price').once('value').then(snap => {
-        const price = Number(snap.val()) || currentPrice;
-        db.ref('users/' + uid).once('value').then(userSnap => {
-            const user = userSnap.val() || {};
-            const usd = Number(user.balanceUSD) || 0;
-            const m = Number(user.mCoinAmount) || 0;
-            if(m >= amount) {
-                db.ref('users/' + uid).update({
-                    balanceUSD: usd + amount * price,
-                    mCoinAmount: m - amount
-                }).then(() => {
-                    const name = user.username || uid;
-                    pushNotification(`${name} vừa bán ${amount} mCoin 💰`);
-                });
-            } else alert('Không đủ mCoin!');
+        const price = snap.val();
+        db.ref('users/' + currentUID).transaction(user => {
+            if(user){
+                if(user.mCoinAmount >= amount){
+                    user.mCoinAmount -= amount;
+                    user.balanceUSD += amount * price;
+                    pushNotification(`${user.username} vừa bán ${amount} mCoin 💰`);
+                }
+            }
+            return user;
         });
     });
 }
 
-// --- Price simulator (same as before) ---
+// Giả lập giá mCoin
 function startPriceSimulator() {
     const marketRef = db.ref('market/mCoin');
     marketRef.once('value').then(snap => {
@@ -255,7 +198,7 @@ function startPriceSimulator() {
     setInterval(() => {
         marketRef.once('value').then(snap => {
             const node = snap.val() || { price: 50, history: [50] };
-            let price = Number(node.price) || 50;
+            let price = node.price;
             let history = node.history || [];
             const fluctuation = (Math.random() - 0.5) * 2;
             price = Math.max(1, price + fluctuation);
