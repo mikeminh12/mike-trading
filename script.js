@@ -27,41 +27,67 @@ const priceChart = new Chart(ctx, {
 });
 
 // Đăng ký user mới
+// === Đăng ký tài khoản mới ===
 function register() {
     const username = document.getElementById('usernameInput').value.trim();
-    if(!username) return alert("Nhập username!");
+    const password = document.getElementById('passwordInput').value.trim();
 
-    const uid = db.ref('users').push().key;
-    db.ref('users/' + uid).set({
-        username,
-        balanceUSD: 1000,
-        mCoinAmount: 0
-    }).then(() => {
-        alert("Đăng ký thành công!");
-        showDashboard(uid);
-    });
-}
+    if (!username || !password) {
+        alert("Vui lòng nhập đầy đủ username và password!");
+        return;
+    }
 
-// Đăng nhập (tìm user theo username)
-function login() {
-    const username = document.getElementById('usernameInput').value.trim();
-    if(!username) return alert("Nhập username!");
-
-    db.ref('users').orderByChild('username').equalTo(username).once('value').then(snap => {
-        if(snap.exists()){
-            const uid = Object.keys(snap.val())[0];
-            showDashboard(uid);
+    // Kiểm tra username đã tồn tại chưa
+    db.ref("users").orderByChild("username").equalTo(username).once("value")
+    .then(snapshot => {
+        if (snapshot.exists()) {
+            alert("Username đã tồn tại!");
         } else {
-            alert("Username không tồn tại!");
+            const uid = db.ref("users").push().key;
+            db.ref("users/" + uid).set({
+                username,
+                password: btoa(password), // Mã hoá Base64
+                balanceUSD: 1000,
+                mCoinAmount: 0
+            }).then(() => {
+                alert("Đăng ký thành công!");
+                currentUID = uid;
+                showDashboard(uid);
+            });
         }
     });
 }
 
-function logout() {
-    currentUID = null;
-    document.getElementById('auth').style.display = 'block';
-    document.getElementById('dashboard').style.display = 'none';
+// === Đăng nhập ===
+function login() {
+    const username = document.getElementById('usernameInput').value.trim();
+    const password = document.getElementById('passwordInput').value.trim();
+
+    if (!username || !password) {
+        alert("Vui lòng nhập đầy đủ username và password!");
+        return;
+    }
+
+    db.ref("users").orderByChild("username").equalTo(username).once("value")
+    .then(snapshot => {
+        if (!snapshot.exists()) {
+            alert("Username không tồn tại!");
+            return;
+        }
+
+        const data = snapshot.val();
+        const uid = Object.keys(data)[0];
+        const user = data[uid];
+
+        if (user.password === btoa(password)) {
+            currentUID = uid;
+            showDashboard(uid);
+        } else {
+            alert("Sai mật khẩu!");
+        }
+    });
 }
+
 
 // Render bảng xếp hạng
 function renderLeaderboard() {
