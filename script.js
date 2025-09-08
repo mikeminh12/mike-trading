@@ -1,4 +1,4 @@
-// === Firebase config ===
+// === Firebase Config ===
 const firebaseConfig = {
     apiKey: "AIzaSyANI-NhTbl8R20twhekpnXtzZvmkOLqP24",
     authDomain: "miketrading-3b86a.firebaseapp.com",
@@ -9,13 +9,13 @@ const firebaseConfig = {
     appId: "1:692740435477:web:e9b9a3696b87eef187e81c",
     measurementId: "G-3NX2TKD3NK"
 };
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// === Biến toàn cục ===
 let currentUID = null;
 let currentPrice = 0;
-let userListener = null;
+let usersData = {};
 
 // === Thông báo nổi ===
 function showNotification(message) {
@@ -77,19 +77,18 @@ function login() {
 
 // === Đăng xuất ===
 function logout() {
-    if (userListener) db.ref("users/" + currentUID).off("value", userListener);
     currentUID = null;
     document.getElementById("auth").style.display = "block";
     document.getElementById("dashboard").style.display = "none";
 }
 
-// === Hiển thị dashboard ===
+// === Hiển thị Dashboard ===
 function showDashboard(uid) {
     document.getElementById("auth").style.display = "none";
     document.getElementById("dashboard").style.display = "block";
 
     // Lắng nghe dữ liệu user realtime
-    userListener = db.ref("users/" + uid).on("value", snap => {
+    db.ref("users/" + uid).on("value", snap => {
         const data = snap.val();
         if (data) {
             document.getElementById("username").innerText = data.username;
@@ -108,28 +107,37 @@ function showDashboard(uid) {
             priceChart.data.labels = history.map((_, i) => i + 1);
             priceChart.data.datasets[0].data = history;
             priceChart.update();
+            renderLeaderboard();
         }
     });
 
-    // Lắng nghe bảng xếp hạng realtime
+    // Lắng nghe toàn bộ users realtime
     db.ref("users").on("value", snapshot => {
-        const tbody = document.querySelector("#leaderboard tbody");
-        tbody.innerHTML = "";
+        usersData = snapshot.val() || {};
+        renderLeaderboard();
+    });
+}
 
-        const users = [];
-        snapshot.forEach(child => {
-            const u = child.val();
-            const totalAsset = u.balanceUSD + u.mCoinAmount * currentPrice;
-            users.push({ username: u.username, totalAsset });
-        });
+// === Render Leaderboard realtime mượt ===
+function renderLeaderboard() {
+    const tbody = document.querySelector("#leaderboard tbody");
+    tbody.innerHTML = "";
 
-        users.sort((a, b) => b.totalAsset - a.totalAsset);
+    const usersArray = Object.values(usersData).map(u => ({
+        username: u.username,
+        totalAsset: u.balanceUSD + u.mCoinAmount * currentPrice
+    }));
 
-        users.forEach((u, i) => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `<td>${i + 1}</td><td>${u.username}</td><td>$${u.totalAsset.toFixed(2)}</td>`;
-            tbody.appendChild(tr);
-        });
+    usersArray.sort((a, b) => b.totalAsset - a.totalAsset);
+
+    usersArray.forEach((u, i) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${i + 1}</td>
+            <td>${u.username}</td>
+            <td>$${u.totalAsset.toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
     });
 }
 
@@ -171,7 +179,7 @@ function sellMCoin() {
     });
 }
 
-// === Mô phỏng giá mCoin ===
+// === Tạo market nếu chưa có ===
 function startPriceSimulator() {
     const marketRef = db.ref("market/mCoin");
     marketRef.once("value").then(snap => {
@@ -184,12 +192,10 @@ function startPriceSimulator() {
         marketRef.once("value").then(snap => {
             let price = snap.val().price;
             let history = snap.val().history || [];
-
             const fluctuation = (Math.random() - 0.5) * 2;
             price = Math.max(1, price + fluctuation);
             history.push(price);
             if (history.length > 50) history.shift();
-
             marketRef.update({ price, history });
         });
     }, 5000);
