@@ -11,8 +11,7 @@
 <h1>mCoin Trading</h1>
 
 <div id="auth">
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
+    <input type="text" id="usernameInput" placeholder="Username">
     <button onclick="register()">Register</button>
     <button onclick="login()">Login</button>
 </div>
@@ -29,7 +28,7 @@
     <button onclick="logout()">Logout</button>
 
     <h3>Bảng xếp hạng tài sản 💰</h3>
-    <table id="leaderboard">
+    <table border="1" style="margin:auto;">
         <thead>
             <tr>
                 <th>Rank</th>
@@ -40,15 +39,12 @@
         <tbody id="leaderboardBody"></tbody>
     </table>
 
-    <h3>Biểu đồ giá mCoin 📈</h3>
     <canvas id="priceChart" width="400" height="200"></canvas>
 </div>
 
-<!-- Toast container -->
-<div id="toastContainer"></div>
+<div id="toastContainer" class="toast-container"></div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="script.js"></script>
 </body>
