@@ -11,9 +11,13 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-let currentUID = null;
 
-// Thêm thông báo nổi
+let currentUID = null;
+let currentPrice = 0;
+let leaderboardListener = null;
+let userListener = null;
+
+// === Hiển thị thông báo nổi ===
 function showNotification(message) {
     const box = document.createElement("div");
     box.className = "notification";
@@ -22,7 +26,7 @@ function showNotification(message) {
     setTimeout(() => box.remove(), 5000);
 }
 
-// Đăng ký
+// === Đăng ký ===
 function register() {
     const username = document.getElementById("usernameInput").value.trim();
     const password = document.getElementById("passwordInput").value.trim();
@@ -48,7 +52,7 @@ function register() {
     });
 }
 
-// Đăng nhập
+// === Đăng nhập ===
 function login() {
     const username = document.getElementById("usernameInput").value.trim();
     const password = document.getElementById("passwordInput").value.trim();
@@ -71,20 +75,24 @@ function login() {
     });
 }
 
-// Đăng xuất
+// === Đăng xuất ===
 function logout() {
+    // Hủy tất cả listener realtime để tránh rò rỉ dữ liệu
+    if (leaderboardListener) db.ref("users").off("value", leaderboardListener);
+    if (userListener) db.ref("users/" + currentUID).off("value", userListener);
+
     currentUID = null;
     document.getElementById("auth").style.display = "block";
     document.getElementById("dashboard").style.display = "none";
 }
 
-// Hiển thị dashboard
+// === Hiển thị dashboard ===
 function showDashboard(uid) {
     document.getElementById("auth").style.display = "none";
     document.getElementById("dashboard").style.display = "block";
 
-    // Load thông tin người dùng realtime
-    db.ref("users/" + uid).on("value", snap => {
+    // Lắng nghe dữ liệu user realtime
+    userListener = db.ref("users/" + uid).on("value", snap => {
         const data = snap.val();
         if (data) {
             document.getElementById("username").innerText = data.username;
@@ -93,79 +101,88 @@ function showDashboard(uid) {
         }
     });
 
-    // Load giá mCoin realtime
+    // Lắng nghe giá mCoin realtime
     db.ref("market/mCoin").on("value", snap => {
         const data = snap.val();
         if (data) {
+            currentPrice = data.price;
             document.getElementById("mCoinPrice").innerText = data.price.toFixed(2);
             const history = data.history || [];
             priceChart.data.labels = history.map((_, i) => i + 1);
             priceChart.data.datasets[0].data = history;
             priceChart.update();
+            updateLeaderboard(); // Cập nhật bảng xếp hạng khi giá thay đổi
         }
     });
 
-    // Cập nhật bảng xếp hạng realtime
-    db.ref("users").on("value", snapshot => {
-        const users = [];
-        snapshot.forEach(child => {
-            const u = child.val();
-            const totalAsset = u.balanceUSD + u.mCoinAmount * parseFloat(document.getElementById("mCoinPrice").innerText || 0);
-            users.push({ username: u.username, totalAsset });
-        });
-
-        users.sort((a, b) => b.totalAsset - a.totalAsset);
-        const tbody = document.querySelector("#leaderboard tbody");
-        tbody.innerHTML = "";
-        users.forEach((u, i) => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `<td>${i + 1}</td><td>${u.username}</td><td>$${u.totalAsset.toFixed(2)}</td>`;
-            tbody.appendChild(tr);
-        });
+    // Lắng nghe bảng xếp hạng realtime
+    leaderboardListener = db.ref("users").on("value", snapshot => {
+        updateLeaderboard(snapshot);
     });
 }
 
-// Mua mCoin
+// === Cập nhật bảng xếp hạng ===
+function updateLeaderboard(snapshot = null) {
+    const tbody = document.querySelector("#leaderboard tbody");
+    tbody.innerHTML = "";
+
+    if (!snapshot) return;
+
+    const users = [];
+    snapshot.forEach(child => {
+        const u = child.val();
+        const totalAsset = u.balanceUSD + u.mCoinAmount * currentPrice;
+        users.push({ username: u.username, totalAsset });
+    });
+
+    users.sort((a, b) => b.totalAsset - a.totalAsset);
+
+    users.forEach((u, i) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${i + 1}</td><td>${u.username}</td><td>$${u.totalAsset.toFixed(2)}</td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+// === Mua mCoin ===
 function buyMCoin() {
     const amount = parseFloat(document.getElementById("tradeAmount").value);
     if (amount <= 0) return alert("Nhập số hợp lệ!");
 
-    db.ref("market/mCoin/price").once("value").then(snap => {
-        const price = snap.val();
-        db.ref("users/" + currentUID).once("value").then(userSnap => {
-            const user = userSnap.val();
-            if (user.balanceUSD >= amount * price) {
-                db.ref("users/" + currentUID).update({
-                    balanceUSD: user.balanceUSD - amount * price,
-                    mCoinAmount: user.mCoinAmount + amount
-                });
-                showNotification(`${user.username} vừa mua ${amount} mCoin!`);
-            } else alert("Không đủ USD!");
-        });
+    db.ref("users/" + currentUID).once("value").then(userSnap => {
+        const user = userSnap.val();
+        if (user.balanceUSD >= amount * currentPrice) {
+            db.ref("users/" + currentUID).update({
+                balanceUSD: user.balanceUSD - amount * currentPrice,
+                mCoinAmount: user.mCoinAmount + amount
+            });
+            showNotification(`${user.username} vừa mua ${amount} mCoin!`);
+        } else {
+            alert("Không đủ USD!");
+        }
     });
 }
 
-// Bán mCoin
+// === Bán mCoin ===
 function sellMCoin() {
     const amount = parseFloat(document.getElementById("tradeAmount").value);
     if (amount <= 0) return alert("Nhập số hợp lệ!");
 
-    db.ref("market/mCoin/price").once("value").then(snap => {
-        const price = snap.val();
-        db.ref("users/" + currentUID).once("value").then(userSnap => {
-            const user = userSnap.val();
-            if (user.mCoinAmount >= amount) {
-                db.ref("users/" + currentUID).update({
-                    balanceUSD: user.balanceUSD + amount * price,
-                    mCoinAmount: user.mCoinAmount - amount
-                });
-                showNotification(`${user.username} vừa bán ${amount} mCoin!`);
-            } else alert("Không đủ mCoin!");
-        });
+    db.ref("users/" + currentUID).once("value").then(userSnap => {
+        const user = userSnap.val();
+        if (user.mCoinAmount >= amount) {
+            db.ref("users/" + currentUID).update({
+                balanceUSD: user.balanceUSD + amount * currentPrice,
+                mCoinAmount: user.mCoinAmount - amount
+            });
+            showNotification(`${user.username} vừa bán ${amount} mCoin!`);
+        } else {
+            alert("Không đủ mCoin!");
+        }
     });
 }
 
-// Tự tạo market nếu chưa có
+// === Tự tạo market nếu chưa có ===
 function startPriceSimulator() {
     const marketRef = db.ref("market/mCoin");
     marketRef.once("value").then(snap => {
@@ -189,7 +206,7 @@ function startPriceSimulator() {
     }, 5000);
 }
 
-// Chart.js
+// === Chart.js ===
 const ctx = document.getElementById("priceChart").getContext("2d");
 const priceChart = new Chart(ctx, {
     type: "line",
@@ -205,5 +222,5 @@ const priceChart = new Chart(ctx, {
     options: { responsive: true }
 });
 
-// Bắt đầu mô phỏng giá
+// === Khởi động mô phỏng giá ===
 startPriceSimulator();
