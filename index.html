@@ -1,57 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mCoin Trading Simulator</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mike Trading</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>mCoin Trading Simulator</h1>
+    <!-- === Khu vực Đăng nhập / Đăng ký === -->
+    <div id="auth">
+        <h1>Mike Trading</h1>
+        <input id="usernameInput" type="text" placeholder="Username">
+        <input id="passwordInput" type="password" placeholder="Password">
+        <button onclick="login()">Đăng nhập</button>
+        <button onclick="register()">Đăng ký</button>
+    </div>
 
-  <!-- Form đăng nhập / đăng ký -->
-  <div id="auth">
-    <input type="text" id="usernameInput" placeholder="Username" />
-    <input type="password" id="passwordInput" placeholder="Password" />
-    <button onclick="register()">Đăng ký</button>
-    <button onclick="login()">Đăng nhập</button>
-  </div>
+    <!-- === Dashboard === -->
+    <div id="dashboard" style="display: none;">
+        <div class="header">
+            <h2>Xin chào, <span id="username"></span> 👋</h2>
+            <button onclick="logout()">Đăng xuất</button>
+        </div>
 
-  <!-- Dashboard -->
-  <div id="dashboard" style="display:none;">
-    <h2>Xin chào, <span id="username"></span></h2>
-    <p>USD: $<span id="balanceUSD"></span></p>
-    <p>mCoin: <span id="mCoinAmount"></span> mCoin</p>
-    <p>Giá mCoin: $<span id="mCoinPrice"></span></p>
+        <div class="stats">
+            <div class="card">
+                <h3>USD Balance</h3>
+                <p>$<span id="balanceUSD">0</span></p>
+            </div>
+            <div class="card">
+                <h3>mCoin Balance</h3>
+                <p><span id="mCoinAmount">0</span> mCoin</p>
+            </div>
+            <div class="card">
+                <h3>mCoin Price</h3>
+                <p>$<span id="mCoinPrice">0</span></p>
+            </div>
+        </div>
 
-    <input type="number" id="tradeAmount" placeholder="Nhập số lượng" />
-    <button onclick="buyMCoin()">Mua mCoin</button>
-    <button onclick="sellMCoin()">Bán mCoin</button>
-    <button onclick="logout()">Đăng xuất</button>
+        <!-- Biểu đồ giá -->
+        <canvas id="priceChart"></canvas>
 
-    <canvas id="priceChart" width="400" height="200"></canvas>
+        <!-- Mua / Bán mCoin -->
+        <div class="trade-box">
+            <input id="tradeAmount" type="number" placeholder="Số lượng mCoin">
+            <button onclick="buyMCoin()">Mua</button>
+            <button onclick="sellMCoin()">Bán</button>
+        </div>
 
-    <!-- Bảng xếp hạng -->
-    <h2>Bảng xếp hạng tài sản 💰</h2>
-    <table id="leaderboard">
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>User</th>
-          <th>Total Asset ($)</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+        <!-- Danh sách user -->
+        <h3>Danh sách người dùng</h3>
+        <table id="usersTable">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>USD Balance</th>
+                    <th>mCoin</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
-  <!-- Thông báo nổi -->
-  <div id="notifications"></div>
+    <div id="notifications"></div>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="script.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
