@@ -1,4 +1,96 @@
-body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background: #f0f2f5; }
-input { padding: 5px; margin: 5px; }
-button { padding: 5px 10px; margin: 5px; cursor: pointer; }
-canvas { margin-top: 20px; }
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+/* Nền liquid glass */
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: url("https://source.unsplash.com/1920x1080/?crypto,finance") no-repeat center center/cover;
+}
+
+/* Container chính */
+.glass-container {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  padding: 30px;
+  width: 800px;
+  color: white;
+  text-align: center;
+}
+
+/* Input & button */
+input {
+  padding: 10px;
+  margin: 8px;
+  width: 200px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  text-align: center;
+}
+button {
+  padding: 10px 20px;
+  margin: 8px;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  background: rgba(0, 123, 255, 0.6);
+  color: white;
+  transition: 0.3s;
+}
+button:hover {
+  background: rgba(0, 123, 255, 0.9);
+}
+
+/* Bảng xếp hạng */
+table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+  color: white;
+}
+th, td {
+  padding: 12px;
+  text-align: center;
+}
+th {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Khung thông báo */
+.glass-notify {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 300px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+.glass-notify h3 {
+  margin-bottom: 10px;
+}
+.glass-notify ul {
+  list-style: none;
+  padding-left: 10px;
+}
