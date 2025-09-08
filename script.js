@@ -14,7 +14,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// Register
+// === Đăng ký ===
 function register() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
@@ -35,7 +35,7 @@ function register() {
     .catch(error => alert(error.message));
 }
 
-// Login
+// === Đăng nhập ===
 function login() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
@@ -48,7 +48,7 @@ function login() {
     .catch(error => alert(error.message));
 }
 
-// Logout
+// === Đăng xuất ===
 function logout() {
     auth.signOut().then(() => {
         document.getElementById('auth').style.display = 'block';
@@ -56,7 +56,7 @@ function logout() {
     });
 }
 
-// Hiển thị dashboard
+// === Dashboard ===
 function showDashboard(uid) {
     document.getElementById('auth').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
@@ -83,21 +83,20 @@ function showDashboard(uid) {
         }
     });
 
-    // Load bảng xếp hạng realtime
+    // === FIX bảng xếp hạng realtime ===
     db.ref('users').on('value', snap => {
         const users = [];
         snap.forEach(child => {
             const u = child.val();
-            const uid = child.key;
-            users.push({
-                username: u.username,
-                asset: u.balanceUSD + u.mCoinAmount * (priceChart.data.datasets[0].data.slice(-1)[0] || 50)
-            });
+            const price = priceChart.data.datasets[0].data.slice(-1)[0] || 50;
+            const asset = u.balanceUSD + u.mCoinAmount * price;
+            users.push({ username: u.username, asset });
         });
-        users.sort((a,b) => b.asset - a.asset);
 
+        users.sort((a,b) => b.asset - a.asset);
         const body = document.getElementById('leaderboardBody');
         body.innerHTML = '';
+
         users.forEach((u, i) => {
             body.innerHTML += `
                 <tr>
@@ -108,24 +107,34 @@ function showDashboard(uid) {
         });
     });
 
-    // Lắng nghe thông báo mua/bán realtime
+    // === Lắng nghe thông báo realtime ===
     db.ref('notifications').on('child_added', snap => {
-        const note = snap.val();
-        const container = document.getElementById('notifications');
-        const div = document.createElement('div');
-        div.classList.add('notification');
-        div.innerText = note;
-        container.prepend(div);
+        showToast(snap.val());
     });
 }
 
-// Gửi thông báo
+// === Gửi thông báo ===
 function pushNotification(msg) {
-    const newRef = db.ref('notifications').push();
-    newRef.set(msg);
+    db.ref('notifications').push().set(msg);
 }
 
-// Mua mCoin
+// === Hiển thị toast ===
+function showToast(msg) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerText = msg;
+    container.appendChild(toast);
+
+    setTimeout(() => toast.classList.add('show'), 100);
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 500);
+    }, 5000);
+}
+
+// === Mua mCoin ===
 function buyMCoin() {
     const uid = auth.currentUser.uid;
     const amount = parseFloat(document.getElementById('tradeAmount').value);
@@ -146,7 +155,7 @@ function buyMCoin() {
     });
 }
 
-// Bán mCoin
+// === Bán mCoin ===
 function sellMCoin() {
     const uid = auth.currentUser.uid;
     const amount = parseFloat(document.getElementById('tradeAmount').value);
@@ -167,15 +176,15 @@ function sellMCoin() {
     });
 }
 
-// Chart.js setup
+// === Chart.js ===
 const ctx = document.getElementById('priceChart').getContext('2d');
 const priceChart = new Chart(ctx, {
     type: 'line',
-    data: { labels: [], datasets: [{ label: 'mCoin Price', data: [], borderColor: '#00f7ff', tension: 0.3 }] },
+    data: { labels: [], datasets: [{ label: 'mCoin Price', data: [], borderColor: 'rgb(75, 192, 192)', tension: 0.2 }] },
     options: { responsive: true }
 });
 
-// Simulator giá
+// === Price simulator ===
 function startPriceSimulator() {
     const marketRef = db.ref('market/mCoin');
     marketRef.once('value').then(snap => {
