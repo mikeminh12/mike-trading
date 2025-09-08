@@ -4,56 +4,58 @@ body {
     padding: 20px;
     background: #f0f2f5;
 }
-
 input {
     padding: 5px;
     margin: 5px;
 }
-
 button {
     padding: 5px 10px;
     margin: 5px;
     cursor: pointer;
 }
-
 canvas {
     margin-top: 20px;
 }
 
-table {
-    width: 100%;
-    margin-top: 15px;
+/* Bảng xếp hạng */
+#leaderboard {
+    margin: 20px auto;
     border-collapse: collapse;
+    width: 60%;
+    background: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
-
-th, td {
+#leaderboard th, #leaderboard td {
+    border: 1px solid #ddd;
     padding: 8px;
-    border: 1px solid #ccc;
+}
+#leaderboard th {
+    background: #007bff;
+    color: white;
 }
 
-/* Toast thông báo nổi */
-#toastContainer {
+/* Thông báo nổi */
+#notifications {
     position: fixed;
-    top: 15px;
-    right: 15px;
-    z-index: 9999;
+    top: 20px;
+    right: 20px;
+    width: 250px;
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
-
-.toast {
-    background-color: #333;
-    color: #fff;
-    padding: 10px 15px;
-    border-radius: 8px;
-    box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
-    opacity: 0;
-    transform: translateX(100%);
-    transition: all 0.5s ease;
+.notification {
+    background: #4caf50;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    animation: fadein 0.3s, fadeout 0.3s 4.7s;
 }
-
-.toast.show {
-    opacity: 1;
-    transform: translateX(0);
+@keyframes fadein {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+@keyframes fadeout {
+    from {opacity: 1;}
+    to {opacity: 0;}
 }
