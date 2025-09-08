@@ -49,18 +49,23 @@
         </div>
 
         <!-- Danh sách user -->
-        <h3>Danh sách người dùng</h3>
-        <table id="usersTable">
-            <thead>
-                <tr>
-                    <th>Username</th>
-                    <th>USD Balance</th>
-                    <th>mCoin</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
+<div id="userListContainer" style="margin-top: 20px;">
+    <h2>Danh sách người dùng 👥</h2>
+    <table id="userListTable" border="1" cellspacing="0" cellpadding="8" style="width: 100%; border-collapse: collapse; text-align: center;">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Số dư USD ($)</th>
+                <th>Số lượng mCoin</th>
+                <th>Tổng tài sản ($)</th>
+            </tr>
+        </thead>
+        <tbody id="userListBody">
+            <!-- User data sẽ được render ở đây -->
+        </tbody>
+    </table>
+</div>
+
 
     <div id="notifications"></div>
 
