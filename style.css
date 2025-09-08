@@ -1,77 +1,88 @@
 body {
     font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: white;
+    margin: 0;
+    padding: 0;
     text-align: center;
+}
+
+#auth, #dashboard {
+    max-width: 700px;
+    margin: auto;
     padding: 20px;
-    background: #f0f2f5;
+}
+
+input, button {
+    padding: 10px;
+    margin: 5px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
 }
 
 input {
-    padding: 8px;
-    margin: 5px;
-    width: 200px;
-    font-size: 14px;
+    width: 60%;
 }
 
 button {
-    padding: 8px 15px;
-    margin: 5px;
     cursor: pointer;
-    border: none;
-    background-color: #007bff;
+    background-color: #2563eb;
     color: white;
-    font-weight: bold;
-    border-radius: 4px;
-    transition: 0.3s;
+    transition: 0.2s;
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: #1e40af;
 }
 
-canvas {
-    margin-top: 20px;
+.stats {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
 }
 
-/* Leaderboard */
-table {
-    margin: 20px auto;
-    width: 80%;
+.card {
+    background: #1e293b;
+    padding: 15px;
+    border-radius: 10px;
+    width: 30%;
+}
+
+#usersTable {
+    width: 100%;
+    margin-top: 15px;
     border-collapse: collapse;
-    background: white;
-    box-shadow: 0 0 8px rgba(0,0,0,0.2);
-    border-radius: 8px;
-    overflow: hidden;
 }
 
-table th, table td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
+#usersTable th, #usersTable td {
+    padding: 8px;
+    border: 1px solid #334155;
 }
 
-table th {
-    background: #007bff;
-    color: white;
+#usersTable th {
+    background: #1e293b;
 }
 
-/* Thông báo nổi */
-#notifications {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
+.trade-box {
+    margin: 20px 0;
 }
 
 .notification {
-    background: #28a745;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #22c55e;
     color: white;
-    padding: 12px 20px;
-    margin-top: 10px;
-    border-radius: 6px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    animation: fadeIn 0.3s ease-out;
+    padding: 10px 15px;
+    border-radius: 10px;
+    animation: fadeInOut 5s forwards;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(-10px); }
+    10% { opacity: 1; transform: translateY(0); }
+    90% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-10px); }
 }
