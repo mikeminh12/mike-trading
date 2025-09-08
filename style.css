@@ -1,96 +1,74 @@
-/* Reset */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
-}
-
-/* Nền liquid glass */
 body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: url("https://source.unsplash.com/1920x1080/?crypto,finance") no-repeat center center/cover;
+  font-family: 'Segoe UI', sans-serif;
+  text-align: center;
+  background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+  margin: 0;
+  padding: 20px;
 }
 
-/* Container chính */
-.glass-container {
+h1 {
+  color: white;
+  text-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+.glass {
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-  padding: 30px;
-  width: 800px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  padding: 20px;
+  margin: 20px auto;
+  border-radius: 16px;
+  width: 500px;
   color: white;
-  text-align: center;
 }
 
-/* Input & button */
-input {
-  padding: 10px;
-  margin: 8px;
-  width: 200px;
+input, button {
+  padding: 8px;
+  margin: 5px;
   border-radius: 8px;
   border: none;
-  outline: none;
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  text-align: center;
 }
+
 button {
-  padding: 10px 20px;
-  margin: 8px;
-  border: none;
   cursor: pointer;
-  border-radius: 8px;
-  background: rgba(0, 123, 255, 0.6);
+  background: #00c6ff;
   color: white;
-  transition: 0.3s;
-}
-button:hover {
-  background: rgba(0, 123, 255, 0.9);
+  font-weight: bold;
+  transition: 0.2s;
 }
 
-/* Bảng xếp hạng */
+button:hover {
+  background: #0072ff;
+}
+
 table {
   width: 100%;
-  margin-top: 20px;
+  margin-top: 10px;
   border-collapse: collapse;
-  color: white;
-}
-th, td {
-  padding: 12px;
-  text-align: center;
-}
-th {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
-}
-tr:hover {
-  background: rgba(255, 255, 255, 0.05);
 }
 
-/* Khung thông báo */
-.glass-notify {
-  display: none;
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 300px;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border-radius: 15px;
-  padding: 15px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+th, td {
+  padding: 8px;
+  color: white;
 }
-.glass-notify h3 {
-  margin-bottom: 10px;
+
+thead {
+  background-color: rgba(255, 255, 255, 0.2);
 }
-.glass-notify ul {
-  list-style: none;
-  padding-left: 10px;
+
+tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.notifications {
+  margin-top: 15px;
+  max-height: 120px;
+  overflow-y: auto;
+  text-align: left;
+}
+.notification {
+  background: rgba(255,255,255,0.2);
+  padding: 6px;
+  margin-bottom: 5px;
+  border-radius: 8px;
 }
